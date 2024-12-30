@@ -1,0 +1,1293 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reproductor de Video con Subtítulos</title>
+    
+    <!-- Importación de la fuente 'Roboto Mono' desde Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* ===========================
+           Estilos CSS del Reproductor
+           =========================== */
+        
+        /* Reset de estilos básicos para eliminar márgenes, paddings y establecer el box-sizing */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Estilos generales del cuerpo */
+        body {
+            font-family: 'Roboto Mono', monospace; /* Fuente monoespaciada */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh; /* Altura completa de la ventana */
+            overflow: hidden; /* Oculta desbordes */
+            background: #000; /* Fondo negro por defecto */
+            color: white; /* Texto blanco por defecto */
+            transition: background-color 0.5s, color 0.5s; /* Transiciones suaves para cambios de tema */
+        }
+
+        /* Estilos para el modo día */
+        body.day-mode {
+            background: #f0f0f0; /* Fondo claro */
+            color: #000; /* Texto negro */
+        }
+
+        /* Contenedor principal de carga */
+        #upload-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%); /* Degradado oscuro */
+            transition: background 0.5s;
+            position: relative; /* Posicionamiento relativo para elementos hijos absolutos */
+        }
+
+        /* Estilos del contenedor de carga en modo día */
+        body.day-mode #upload-container {
+            background: linear-gradient(135deg, #ffffff 0%, #d3d3d3 100%); /* Degradado claro */
+        }
+
+        /* Contenedor interno de carga */
+        #upload-inner {
+            background: rgba(255,255,255,0.1); /* Fondo semi-transparente */
+            padding: 40px;
+            border-radius: 15px; /* Bordes redondeados */
+            box-shadow: 0 0 20px rgba(0,0,0,0.5); /* Sombra para profundidad */
+            text-align: center;
+            max-width: 350px;
+            width: 90%;
+            transition: background 0.5s, color 0.5s;
+            position: relative; /* Posicionamiento relativo para íconos internos */
+        }
+
+        /* Estilos del contenedor interno en modo día */
+        body.day-mode #upload-inner {
+            background: rgba(255,255,255,0.8); /* Fondo más opaco */
+            color: #000; /* Texto negro */
+            box-shadow: 0 0 20px rgba(0,0,0,0.2); /* Sombra más suave */
+        }
+
+        /* Título dentro del contenedor de carga */
+        #upload-inner h1 {
+            margin-bottom: 20px;
+            font-size: 28px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px; /* Espacio entre íconos y texto */
+        }
+
+        /* Párrafo descriptivo dentro del contenedor de carga */
+        #upload-inner p {
+            margin-bottom: 25px;
+            font-size: 18px;
+        }
+
+        /* Grupo de entrada para archivos */
+        #upload-inner .input-group {
+            margin-bottom: 25px;
+            text-align: left;
+            font-size: 16px;
+        }
+
+        /* Etiquetas de los grupos de entrada */
+        #upload-inner .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        /* Iconos dentro de las etiquetas */
+        #upload-inner .input-group span {
+            margin-right: 5px;
+            font-size: 20px;
+        }
+
+        /* Estilos para los campos de entrada de tipo archivo */
+        #upload-inner input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            border: none;
+            font-size: 14px;
+            user-select: text; /* Permitir selección de texto */
+        }
+
+        /* Botón de reproducción */
+        #upload-inner button {
+            width: 100%;
+            background-color: #1a73e8; /* Azul */
+            color: white;
+            border: none;
+            padding: 12px;
+            font-size: 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.1s ease;
+        }
+
+        /* Efecto al pasar el cursor sobre el botón */
+        #upload-inner button:hover {
+            background-color: #1558b0; /* Azul más oscuro */
+            transform: scale(1.02); /* Pequeño aumento de tamaño */
+        }
+
+        /* Ícono del Manual */
+        #manual-icon {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 24px;
+            cursor: pointer;
+            transition: color 0.3s;
+            color: #fff; /* Color blanco por defecto */
+            z-index: 11; /* Asegura que esté por encima de otros elementos */
+        }
+
+        /* Ícono del Manual en modo día */
+        body.day-mode #manual-icon {
+            color: #000; /* Color negro */
+        }
+
+        /* Efecto al pasar el cursor sobre el ícono del manual */
+        #manual-icon:hover {
+            color: #f1c40f; /* Amarillo brillante */
+        }
+
+        /* Contenedor de la flecha flotante interactiva */
+        #floating-arrow-container {
+            position: absolute;
+            top: 60px; /* Posición ajustable */
+            left: 10px; /* Posición ajustable */
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            animation: float 2s infinite; /* Animación de flotación */
+            z-index: 10; /* Por debajo del ícono del manual */
+            background: rgba(255, 255, 255, 0.2); /* Fondo semi-transparente */
+            padding: 5px 10px;
+            border-radius: 8px;
+            transition: background 0.3s;
+        }
+
+        /* Fondo del contenedor de la flecha en modo día */
+        body.day-mode #floating-arrow-container {
+            background: rgba(0, 0, 0, 0.2); /* Fondo oscuro semi-transparente */
+        }
+
+        /* Efecto al pasar el cursor sobre el contenedor de la flecha */
+        #floating-arrow-container:hover {
+            background: rgba(255, 255, 255, 0.4); /* Fondo más claro */
+        }
+
+        body.day-mode #floating-arrow-container:hover {
+            background: rgba(0, 0, 0, 0.4); /* Fondo más oscuro en modo día */
+        }
+
+        /* Ícono de flecha con SVG */
+        .arrow-icon {
+            width: 40px;
+            height: 40px;
+            margin-left: 10px; /* Espacio entre el texto y la flecha */
+            transition: transform 0.3s, fill 0.3s;
+            fill: #fff; /* Color blanco por defecto */
+        }
+
+        /* Ícono de flecha en modo día */
+        body.day-mode .arrow-icon {
+            fill: #000; /* Color negro */
+        }
+
+        /* Efecto al pasar el cursor sobre el ícono de flecha */
+        .arrow-icon:hover {
+            transform: scale(1.1); /* Aumento de tamaño */
+            fill: #f1c40f; /* Cambio de color a amarillo */
+        }
+
+        /* Texto de la flecha */
+        .arrow-text {
+            font-size: 18px;
+            font-weight: 700;
+            color: #fff; /* Color blanco por defecto */
+            transition: color 0.3s;
+            white-space: nowrap; /* Evita que el texto se divida en varias líneas */
+        }
+
+        /* Texto de la flecha en modo día */
+        body.day-mode .arrow-text {
+            color: #000; /* Color negro */
+        }
+
+        /* Animación de flotación para la flecha */
+        @keyframes float {
+            0% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-15px); /* Flotación hacia arriba */
+            }
+            100% {
+                transform: translateY(0);
+            }
+        }
+
+        /* Contenedor del video */
+        #video-container {
+            width: 100%;
+            height: 60%; /* Ocupa el 60% de la altura */
+            display: none; /* Oculto por defecto */
+            justify-content: center;
+            align-items: center;
+            background: #000; /* Fondo negro */
+            transition: background-color 0.5s;
+            position: relative;
+        }
+
+        /* Fondo del contenedor del video en modo día */
+        body.day-mode #video-container {
+            background: #ffffff; /* Fondo blanco */
+        }
+
+        /* Estilos para el elemento de video */
+        video {
+            max-height: auto;
+            max-width: 100%;
+            object-fit: contain; /* Mantiene la relación de aspecto */
+        }
+
+        /* Contenedor de subtítulos flotantes */
+        #floating-subtitles {
+            position: absolute;
+            bottom: 20%; /* Ajusta la posición de los subtítulos */
+            width: 90%; /* Ancho relativo */
+            text-align: center; /* Centrado horizontal */
+            color: white; /* Color del texto */
+            font-size: 18px;
+            line-height: 1.5;
+            word-wrap: break-word;
+            background: none; /* Sin fondo */
+            padding: 0; /* Sin padding */
+            border: none; /* Sin bordes */
+            transition: color 0.5s; /* Transición suave */
+        }
+
+        body.day-mode #floating-subtitles {
+            color: black; /* Cambia el color a negro en modo día */
+        }
+
+        /* Contenedor de subtítulos en español */
+        #subtitle-es-display {
+            margin-top: 10px; /* Espacio entre los subtítulos originales y los en español */
+            color: #f1c40f; /* Color diferente para distinguir los subtítulos en español */
+            font-size: 18px;
+            line-height: 1.5;
+            word-wrap: break-word;
+            text-align: center;
+            background: none;
+            padding: 0;
+            border: none;
+            transition: color 0.5s; /* Agregada transición para font-size */
+        }
+
+        body.day-mode #subtitle-es-display {
+            color: #e67e22; /* Color adaptado para modo día */
+        }
+
+        /* Contenedor de subtítulos */
+        #subtitle-container {
+            width: 100%;
+            height: 40%; /* Ocupa el 40% de la altura */
+            display: none; /* Oculto por defecto */
+            justify-content: center;
+            align-items: flex-start;
+            padding: 15px 25px;
+            background: rgba(0, 0, 0, 0.8); /* Fondo semi-transparente negro */
+            color: white; /* Texto blanco */
+            text-align: left;
+            border-radius: 0;
+            overflow: hidden;
+            transition: background-color 0.5s, color 0.5s;
+        }
+
+        /* Contenedor de subtítulos en modo día */
+        body.day-mode #subtitle-container {
+            background: rgba(255, 255, 255, 0.8); /* Fondo semi-transparente blanco */
+            color: #000; /* Texto negro */
+        }
+
+        /* Estilos para el display de subtítulos */
+        #subtitle-display {
+            transition: opacity 0.3s ease, font-size 0.3s ease;
+            line-height: 1.5;
+            word-wrap: break-word;
+            max-width: 90%;
+            user-select: text; /* Permitir selección de texto */
+        }
+
+        /* Botones de cambio de tema y lista */
+        #theme-toggle, #list-toggle {
+            position: fixed;
+            top: 20px;
+            width: 50px;
+            height: 50px;
+            background: rgba(0, 0, 0, 0.7); /* Fondo semi-transparente negro */
+            color: white;
+            border: none;
+            border-radius: 50%; /* Botón circular */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Sombra */
+            transition: background-color 0.5s, color 0.5s;
+        }
+
+        /* Botones en modo día */
+        #theme-toggle.day-mode, #list-toggle.day-mode {
+            background: rgba(255, 255, 255, 0.7); /* Fondo semi-transparente blanco */
+            color: #000; /* Texto negro */
+        }
+
+        /* Posición específica de los botones */
+        #theme-toggle {
+            right: 80px; /* A la derecha con margen */
+        }
+        #list-toggle {
+            right: 20px; /* Más cerca del borde derecho */
+        }
+
+        /* Estilo para palabras resaltadas */
+        .highlighted {
+            background-color: yellow; /* Fondo amarillo */
+            color: black; /* Texto negro */
+            cursor: pointer;
+        }
+
+        /* Resaltar la primera línea con un color diferente */
+        .first-line {
+            border-radius: 5px;
+            padding: 2px 4px;
+            transition: background-color 0.5s;
+        }
+
+        /* Resaltar la primera línea en modo día */
+        body.day-mode .first-line {
+            background-color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Contenedor para palabras seleccionadas */
+        #selected-words-container {
+            position: fixed;
+            top: 20%;
+            right: 20px;
+            width: 220px;
+            background: rgba(0,0,0,0.8); /* Fondo semi-transparente negro */
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            display: none; /* Oculto por defecto */
+            max-height: 50%;
+            overflow-y: auto; /* Desplazamiento vertical si excede la altura */
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3); /* Sombra */
+            transition: background 0.5s, color 0.5s;
+        }
+
+        /* Contenedor de palabras seleccionadas en modo día */
+        body.day-mode #selected-words-container {
+            background: rgba(255,255,255,0.8); /* Fondo semi-transparente blanco */
+            color: black; /* Texto negro */
+        }
+
+        /* Título del contenedor de palabras seleccionadas */
+        #selected-words-container h2 {
+            font-size: 18px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        /* Lista de palabras seleccionadas */
+        #selected-words-container ul {
+            list-style: none; /* Sin viñetas */
+            padding-left: 0;
+            max-width: 100%;
+            word-break: break-all; /* Romper palabras largas */
+        }
+
+        /* Elementos de la lista */
+        #selected-words-container li {
+            margin-bottom: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Botones dentro de la lista de palabras seleccionadas */
+        #selected-words-container li button {
+            background-color: transparent;
+            color: inherit; /* Hereda el color del texto */
+            border: 2px solid currentColor; /* Borde con el color actual */
+            border-radius: 50%; /* Botón circular */
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* Efecto al pasar el cursor sobre los botones de la lista */
+        #selected-words-container li button:hover {
+            background-color: currentColor; /* Fondo cambia al color actual */
+            color: #fff; /* Texto blanco */
+        }
+
+        /* Botón de descarga de la lista */
+        #selected-words-container #download-button {
+            margin-top: 10px;
+            font-size: 14px;
+            width: 100%;
+            padding: 8px;
+            background-color: #27ae60; /* Verde */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        /* Botón de descarga en modo día */
+        body.day-mode #selected-words-container #download-button {
+            background-color: #2ecc71; /* Verde más claro */
+        }
+
+        /* Efecto al pasar el cursor sobre el botón de descarga */
+        #selected-words-container #download-button:hover {
+            background-color: #1e8449; /* Verde más oscuro */
+            transform: scale(1.05); /* Aumento de tamaño */
+        }
+
+        /* Botón de limpiar toda la lista */
+        #selected-words-container #clear-all {
+            margin-top: 10px;
+            font-size: 14px;
+            width: 100%;
+            padding: 8px;
+            background-color: #e74c3c; /* Rojo */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        /* Botón de limpiar en modo día */
+        body.day-mode #selected-words-container #clear-all {
+            background-color: #c0392b; /* Rojo más oscuro */
+        }
+
+        /* Efecto al pasar el cursor sobre el botón de limpiar */
+        #selected-words-container #clear-all:hover {
+            background-color: #a93226; /* Rojo aún más oscuro */
+            transform: scale(1.05); /* Aumento de tamaño */
+        }
+
+        /* Estilos para el Modal del Manual de Uso */
+        #manual-modal {
+            display: none; /* Oculto por defecto */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7); /* Fondo semi-transparente oscuro */
+            z-index: 1000; /* Por encima de todos los elementos */
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        /* Mostrar el modal cuando está activo */
+        #manual-modal.active {
+            display: flex;
+        }
+
+        /* Contenido del manual dentro del modal */
+        #manual-content {
+            background: #fff; /* Fondo blanco */
+            color: #000; /* Texto negro */
+            max-width: 600px;
+            width: 100%;
+            max-height: 80%;
+            overflow-y: auto; /* Desplazamiento vertical si excede la altura */
+            border-radius: 10px;
+            padding: 20px;
+            position: relative;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3); /* Sombra */
+            transition: background 0.5s, color 0.5s;
+        }
+
+        /* Contenido del manual en modo día */
+        body.day-mode #manual-content {
+            background: #f9f9f9; /* Fondo muy claro */
+            color: #000; /* Texto negro */
+        }
+
+        /* Botón de cerrar el modal */
+        #manual-close {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: transparent;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #555; /* Color gris */
+            transition: color 0.3s;
+        }
+
+        /* Efecto al pasar el cursor sobre el botón de cerrar */
+        #manual-close:hover {
+            color: #000; /* Cambio a negro */
+        }
+
+        /* Títulos y texto dentro del manual */
+        #manual-content h2 {
+            margin-bottom: 15px;
+            font-size: 24px;
+            text-align: center;
+        }
+
+        #manual-content p, #manual-content ul {
+            margin-bottom: 10px;
+            line-height: 1.6;
+            font-size: 16px;
+        }
+
+        /* Estilos para listas dentro del manual */
+        #manual-content ul {
+            padding-left: 20px;
+        }
+
+        /* Clase para ocultar elementos */
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <!-- ===========================
+           Contenedor de Carga
+           =========================== -->
+    <div id="upload-container">
+        <div id="upload-inner">
+            <!-- Ícono del Manual -->
+            <div id="manual-icon" title="Manual de Uso">ℹ️</div>
+            
+            <!-- Flecha Flotante Interactiva Mejorada -->
+            <div id="floating-arrow-container" title="Lea las instrucciones">
+                <!-- Texto Descriptivo -->
+                <div class="arrow-text">Lea las instrucciones</div>
+                <!-- Ícono de Flecha SVG -->
+                <svg class="arrow-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <path d="M12 2l8 8h-6v8h-4v-8H4z"/>
+                </svg>
+            </div>
+
+            <!-- Título Principal -->
+            <h1>🎬 Reproductor con Subtítulos</h1>
+            <!-- Descripción -->
+            <p>Selecciona tu video y archivos de subtítulos</p>
+            
+            <!-- Grupo de entrada para el video -->
+            <div class="input-group">
+                <label><span>📹</span>Video (mp4)</label>
+                <input type="file" id="video-upload" accept="video/mp4">
+            </div>
+            
+            <!-- Grupo de entrada para los subtítulos originales -->
+            <div class="input-group">
+                <label><span>📝</span>Subtítulos (srt)</label>
+                <input type="file" id="srt-upload" accept=".srt">
+            </div>
+            
+            <!-- Grupo de entrada para subtítulos en español -->
+            <div class="input-group">
+                <label><span>🇪🇸</span>Subtítulos en Español (srt)</label>
+                <input type="file" id="srt-es-upload" accept=".srt">
+            </div>
+            
+            <!-- Botón para iniciar la reproducción -->
+            <button onclick="startPlayback()">▶️ Reproducir</button>
+        </div>
+    </div>
+
+    <!-- ===========================
+           Contenedor del Video
+           =========================== -->
+<div id="video-container">
+    <video id="video-player" controls></video>
+    <!-- Contenedor flotante de subtítulos dentro de la caja del video -->
+    <div id="floating-subtitles">
+        <div id="subtitle-display"></div>
+
+    </div>
+</div>
+
+<!-- Caja de subtítulos vacía como decoración -->
+<div id="subtitle-container">
+    <div id="subtitle-display"></div>
+    <div id="subtitle-es-display"></div> <!-- Nuevo contenedor para subtítulos en español -->
+</div>
+
+    <!-- ===========================
+           Botones de Modo y Lista
+           =========================== -->
+    <button id="theme-toggle" onclick="toggleTheme()">🌙</button>
+    <button id="list-toggle">📜</button>
+
+    <!-- ===========================
+           Contenedor de Palabras Seleccionadas
+           =========================== -->
+    <div id="selected-words-container">
+        <h2>Seleccionadas</h2>
+        <ul id="selected-words-list"></ul>
+        <button id="download-button">⬇️ Descargar lista</button>
+        <button id="clear-all">🗑️ Limpiar todo</button>
+    </div>
+
+    <!-- ===========================
+           Modal del Manual de Uso
+           =========================== -->
+    <div id="manual-modal">
+        <div id="manual-content">
+            <!-- Botón de Cerrar el Modal -->
+            <button id="manual-close" title="Cerrar Manual">✖️</button>
+            <!-- Contenido del Manual -->
+            <h2>Manual de Uso</h2>
+            <p>Bienvenido al <strong>Reproductor de Video con Subtítulos</strong>. A continuación, se detallan las funcionalidades y cómo utilizarlas de manera eficiente:</p>
+            <h3>1. Carga de Archivos</h3>
+            <ul>
+                <li><strong>Video (mp4):</strong> Selecciona un archivo de video en formato MP4 desde tu dispositivo.</li>
+                <li><strong>Subtítulos (srt):</strong> Selecciona un archivo de subtítulos en formato SRT que corresponda con el video seleccionado.</li>
+                <li><strong>Subtítulos en Español (srt):</strong> Selecciona un archivo de subtítulos en español en formato SRT que tenga los mismos tiempos que los subtítulos originales.</li>
+            </ul>
+            <h3>2. Reproducción</h3>
+            <p>Una vez que hayas seleccionado todos los archivos necesarios, haz clic en el botón <strong>▶️ Reproducir</strong> para iniciar la reproducción del video con los subtítulos cargados.</p>
+            <h3>3. Selección de Palabras</h3>
+            <ul>
+                <li><strong>Selección Individual:</strong> Haz clic en cualquier palabra de la primera línea de los subtítulos (en el idioma original) para resaltar y agregarla a la lista de seleccionadas.</li>
+                <li><strong>Selección Múltiple:</strong> Arrastra el cursor sobre varias palabras consecutivas de la primera línea para seleccionarlas como una sola entrada en la lista.</li>
+            </ul>
+            <h3>4. Gestión de Selecciones</h3>
+            <ul>
+                <li><strong>Descargar Lista:</strong> Haz clic en el botón <strong>⬇️ Descargar lista</strong> para descargar un archivo de texto con todas las palabras/frases seleccionadas.</li>
+                <li><strong>Limpiar Todo:</strong> Haz clic en el botón <strong>🗑️ Limpiar todo</strong> para eliminar todas las selecciones de la lista.</li>
+            </ul>
+            <h3>5. Modo Día/Noche</h3>
+            <p>Usa el botón <strong>🌙/☀️</strong> ubicado en la parte superior derecha para alternar entre modo oscuro y claro, mejorando la visibilidad según tus preferencias.</p>
+            <h3>6. Reanudación del Video</h3>
+            <p>Al pausar el video, puedes reanudar la reproducción haciendo clic en cualquier área de la pantalla que no sea interactiva (como los botones o la lista de seleccionadas).</p>
+            <p>¡Disfruta de una experiencia de visualización mejorada!</p>
+        </div>
+    </div>
+
+    <!-- ===========================
+           Scripts JavaScript
+           =========================== -->
+    <script>
+        /* ===========================
+           Variables y Elementos del DOM
+           =========================== */
+        
+        // Arrays para almacenar los subtítulos
+        let subtitles = [];
+        let spanishSubtitles = [];
+
+        // Elementos del DOM para el video y subtítulos
+        const videoElement = document.getElementById('video-player');
+        const subtitleDisplay = document.getElementById('subtitle-display');
+        const spanishSubtitleDisplay = document.getElementById('subtitle-es-display'); // Nuevo elemento para subtítulos en español
+        const videoContainer = document.getElementById('video-container');
+        const subtitleContainer = document.getElementById('subtitle-container');
+        const uploadContainer = document.getElementById('upload-container');
+        const themeToggle = document.getElementById('theme-toggle');
+        const listToggle = document.getElementById('list-toggle');
+        const selectedWordsContainer = document.getElementById('selected-words-container');
+        const selectedWordsList = document.getElementById('selected-words-list');
+        const downloadButton = document.getElementById('download-button');
+        const clearAllButton = document.getElementById('clear-all');
+
+        // Elementos del Modal del Manual
+        const manualIcon = document.getElementById('manual-icon');
+        const manualModal = document.getElementById('manual-modal');
+        const manualClose = document.getElementById('manual-close');
+        const floatingArrowContainer = document.getElementById('floating-arrow-container');
+
+        // Variables para controlar el estado
+        let lastSubtitle = null; // Último subtítulo mostrado
+        let isDayMode = false; // Estado del modo día/noche
+        let selectedItems = []; // Lista de palabras/frases seleccionadas
+        let videoFile = null; // Archivo de video seleccionado
+
+        /* ===========================
+           Carga de Datos desde localStorage
+           =========================== */
+
+        // Recuperar elementos seleccionados previamente almacenados en localStorage
+        const storedItems = localStorage.getItem('selectedItems');
+        if (storedItems) {
+            selectedItems = JSON.parse(storedItems);
+        }
+
+        /* ===========================
+           Manejo de la Carga de Archivos
+           =========================== */
+
+        // Evento para manejar la carga del archivo de video
+        document.getElementById('video-upload').addEventListener('change', (event) => {
+            videoFile = event.target.files[0]; // Guardar el archivo seleccionado
+        });
+
+        // Evento para manejar la carga del archivo de subtítulos originales
+        document.getElementById('srt-upload').addEventListener('change', (event) => {
+            const srtFile = event.target.files[0];
+            if (srtFile) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    parseSRT(e.target.result); // Parsear el contenido del archivo SRT
+                };
+                reader.readAsText(srtFile); // Leer el archivo como texto
+            }
+        });
+
+        // Evento para manejar la carga del archivo de subtítulos en español
+        document.getElementById('srt-es-upload').addEventListener('change', (event) => {
+            const srtEsFile = event.target.files[0];
+            if (srtEsFile) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    parseSRTSpanish(e.target.result); // Parsear el contenido del archivo SRT en español
+                };
+                reader.readAsText(srtEsFile); // Leer el archivo como texto
+            }
+        });
+
+        /* ===========================
+           Funciones para Parsear Subtítulos SRT
+           =========================== */
+
+        // Función para parsear el archivo SRT y almacenar los subtítulos
+        function parseSRT(data) {
+            const srtLines = data.split(/\r?\n/); // Dividir el contenido por líneas
+            subtitles = []; // Reiniciar el array de subtítulos
+            let i = 0;
+
+            while (i < srtLines.length) {
+                const line = srtLines[i].trim();
+
+                // Verificar si la línea actual es un número (identificador del subtítulo)
+                if (/^\d+$/.test(line)) {
+                    const times = srtLines[i + 1].split(' --> '); // Obtener tiempos de inicio y fin
+                    const start = parseTime(times[0]); // Convertir tiempo de inicio a segundos
+                    const end = parseTime(times[1]); // Convertir tiempo de fin a segundos
+                    let text = '';
+
+                    i += 2; // Avanzar a la línea de texto del subtítulo
+                    while (i < srtLines.length && srtLines[i].trim() !== '') {
+                        text += srtLines[i] + '\n'; // Concatenar líneas de texto
+                        i++;
+                    }
+                    text = text.trim(); // Eliminar espacios al inicio y fin
+                    subtitles.push({ start, end, text }); // Agregar el subtítulo al array
+                } else {
+                    i++; // Avanzar a la siguiente línea
+                }
+            }
+        }
+
+        // Función para parsear el archivo SRT en español y almacenar los subtítulos
+        function parseSRTSpanish(data) {
+            const srtLines = data.split(/\r?\n/); // Dividir el contenido por líneas
+            spanishSubtitles = []; // Reiniciar el array de subtítulos en español
+            let i = 0;
+
+            while (i < srtLines.length) {
+                const line = srtLines[i].trim();
+
+                // Verificar si la línea actual es un número (identificador del subtítulo)
+                if (/^\d+$/.test(line)) {
+                    const times = srtLines[i + 1].split(' --> '); // Obtener tiempos de inicio y fin
+                    const start = parseTime(times[0]); // Convertir tiempo de inicio a segundos
+                    const end = parseTime(times[1]); // Convertir tiempo de fin a segundos
+                    let text = '';
+
+                    i += 2; // Avanzar a la línea de texto del subtítulo
+                    while (i < srtLines.length && srtLines[i].trim() !== '') {
+                        text += srtLines[i] + '\n'; // Concatenar líneas de texto
+                        i++;
+                    }
+                    text = text.trim(); // Eliminar espacios al inicio y fin
+                    spanishSubtitles.push({ start, end, text }); // Agregar el subtítulo al array
+                } else {
+                    i++; // Avanzar a la siguiente línea
+                }
+            }
+        }
+
+        // Función para convertir un tiempo en formato SRT a segundos
+        function parseTime(timeString) {
+            const parts = timeString.split(/[:,]/); // Separar horas, minutos, segundos y milisegundos
+            return (
+                parseInt(parts[0]) * 3600 + // Horas a segundos
+                parseInt(parts[1]) * 60 +   // Minutos a segundos
+                parseInt(parts[2]) +        // Segundos
+                parseInt(parts[3]) / 1000   // Milisegundos a segundos
+            );
+        }
+
+        /* ===========================
+           Función para Iniciar la Reproducción
+           =========================== */
+
+        function startPlayback() {
+            // Verificar si se ha cargado un video
+            if (!videoFile) {
+                alert('Por favor, sube un video primero.');
+                return;
+            }
+
+            // Verificar si se han cargado subtítulos originales
+            if (subtitles.length === 0) {
+                alert('Por favor, sube un archivo de subtítulos original (.srt).');
+                return;
+            }
+
+            // Verificar si se han cargado subtítulos en español
+            if (spanishSubtitles.length === 0) {
+                alert('Por favor, sube un archivo de subtítulos en español (.srt).');
+                return;
+            }
+
+            // Asignar la fuente del video utilizando la URL creada a partir del archivo seleccionado
+            videoElement.src = URL.createObjectURL(videoFile);
+            uploadContainer.style.display = 'none'; // Ocultar el contenedor de carga
+            videoContainer.style.display = 'flex'; // Mostrar el contenedor de video
+            subtitleContainer.style.display = 'flex'; // Mostrar el contenedor de subtítulos
+            floatingArrowContainer.style.display = 'none'; // Ocultar la flecha una vez iniciado el video
+
+            // Entrar en modo pantalla completa
+            enterFullScreen(document.documentElement);
+            videoElement.play(); // Iniciar reproducción del video
+
+            // Evento para actualizar los subtítulos en función del tiempo de reproducción
+            videoElement.ontimeupdate = () => {
+                const currentTime = videoElement.currentTime;
+                const subtitle = subtitles.find(
+                    (sub) => currentTime >= sub.start && currentTime <= sub.end
+                );
+                const spanishSubtitle = spanishSubtitles.find(
+                    (sub) => currentTime >= sub.start && currentTime <= sub.end
+                );
+
+                if (subtitle && subtitle !== lastSubtitle) {
+                    lastSubtitle = subtitle; // Actualizar el último subtítulo mostrado
+                    videoElement.pause(); // Pausar el video para mostrar el subtítulo
+
+                    const lines = calculateEffectiveLines(subtitle.text); // Calcular líneas efectivas
+                    adjustSubtitleSize(lines); // Ajustar el tamaño de la fuente según las líneas
+                    const formattedSubtitle = formatSubtitle(subtitle.text); // Formatear el subtítulo
+                    subtitleDisplay.innerHTML = formattedSubtitle; // Mostrar el subtítulo
+
+                    addSelectionEvents(); // Añadir eventos de selección a las palabras
+
+                    subtitleDisplay.style.opacity = '1'; // Hacer visible el subtítulo
+                } else if (!subtitle) {
+                    subtitleDisplay.style.opacity = '0'; // Ocultar el subtítulo si no hay ninguno
+                }
+
+                // Manejar los subtítulos en español
+                if (spanishSubtitle) {
+                    const formattedSpanishSubtitle = formatSpanishSubtitle(spanishSubtitle.text);
+                    spanishSubtitleDisplay.innerHTML = formattedSpanishSubtitle; // Aplicar formateo
+                    spanishSubtitleDisplay.style.opacity = '1'; // Hacer visible el subtítulo en español
+                } else {
+                    spanishSubtitleDisplay.style.opacity = '0'; // Ocultar el subtítulo en español si no hay ninguno
+                }
+            };
+        }
+
+        /* ===========================
+           Funciones para Manejar Subtítulos
+           =========================== */
+
+        // Calcular el número efectivo de líneas para ajustar el tamaño de la fuente
+        function calculateEffectiveLines(text) {
+            const words = text.split(' ');
+            let effectiveLines = 0;
+
+            words.forEach((word) => {
+                effectiveLines += Math.ceil(word.length / 40); // Estimación de líneas por palabra
+            });
+
+            return effectiveLines;
+        }
+
+        // Ajustar el tamaño de la fuente según el número de líneas
+        function adjustSubtitleSize(lineCount) {
+            if (lineCount <= 2) {
+                spanishSubtitleDisplay.style.fontSize = '38px';
+            } else if (lineCount <= 6) {
+                spanishSubtitleDisplay.style.fontSize = '24px';
+            } else if (lineCount <= 10) {
+                spanishSubtitleDisplay.style.fontSize = '30px';
+            } else if (lineCount <= 14) {
+                spanishSubtitleDisplay.style.fontSize = '26px';
+            } else {
+                spanishSubtitleDisplay.style.fontSize = '20px';
+            }
+        }
+
+        // Formatear los subtítulos originales, envolviendo cada palabra en un <span> para permitir la selección
+        function formatSubtitle(text) {
+            const lines = text.split('\n');
+            if (lines.length === 0) return '';
+            const firstLine = lines[0];
+            const otherLines = lines.slice(1).join('<br>');
+
+            // Envolver cada palabra de la primera línea en un span para permitir la selección
+            const formattedFirstLine = firstLine.split(' ').map(word => {
+                return `<span class="word">${word}</span>`;
+            }).join(' ');
+
+            // Devolver el subtítulo formateado con la primera línea resaltada
+            return `<div class="first-line">${formattedFirstLine}</div><br>${otherLines}`;
+        }
+
+        // Nueva función para formatear los subtítulos en español (sin envoltura en spans)
+        function formatSpanishSubtitle(text) {
+            // Puedes aplicar cualquier formateo adicional aquí si es necesario
+            // Por ejemplo, puedes agregar cursivas, negritas, etc.
+            // En este caso, simplemente devolvemos el texto tal cual
+            return text.replace(/\n/g, '<br>'); // Reemplazar saltos de línea por <br>
+        }
+
+        /* ===========================
+           Función para Entrar en Pantalla Completa
+           =========================== */
+
+        function enterFullScreen(element) {
+            if (element.requestFullscreen) {
+                element.requestFullscreen();
+            } else if (element.mozRequestFullScreen) { /* Firefox */
+                element.mozRequestFullScreen();
+            } else if (element.webkitRequestFullscreen) { /* Chrome, Safari & Opera */
+                element.webkitRequestFullscreen();
+            } else if (element.msRequestFullscreen) { /* IE/Edge */
+                element.msRequestFullscreen();
+            }
+        }
+
+        /* ===========================
+           Función para Alternar Modo Día/Noche
+           =========================== */
+
+        function toggleTheme() {
+            isDayMode = !isDayMode; // Cambiar el estado del modo
+            document.body.classList.toggle('day-mode', isDayMode); // Alternar clase en el cuerpo
+            uploadContainer.classList.toggle('day-mode', isDayMode); // Alternar clase en el contenedor de carga
+            videoContainer.classList.toggle('day-mode', isDayMode); // Alternar clase en el contenedor de video
+            subtitleContainer.classList.toggle('day-mode', isDayMode); // Alternar clase en el contenedor de subtítulos
+            selectedWordsContainer.classList.toggle('day-mode', isDayMode); // Alternar clase en el contenedor de palabras seleccionadas
+            themeToggle.classList.toggle('day-mode', isDayMode); // Alternar clase en el botón de tema
+            listToggle.classList.toggle('day-mode', isDayMode); // Alternar clase en el botón de lista
+            manualContentStyle(); // Ajustar estilos del contenido del manual
+
+            // Cambiar el ícono del botón según el modo
+            themeToggle.innerHTML = isDayMode ? '🌙' : '☀️';
+        }
+
+        // Ajustar estilos del contenido del manual según el modo
+        function manualContentStyle() {
+            const manualContent = document.getElementById('manual-content');
+            if (isDayMode) {
+                manualContent.style.background = '#f9f9f9';
+                manualContent.style.color = '#000';
+            } else {
+                manualContent.style.background = '#fff';
+                manualContent.style.color = '#000';
+            }
+        }
+
+        /* ===========================
+           Funciones para Manejar la Selección de Palabras
+           =========================== */
+
+        // Añadir eventos de selección y clic a las palabras de la primera línea
+        function addSelectionEvents() {
+            // Añadir evento de clic a cada palabra individual de la primera línea
+            subtitleDisplay.querySelectorAll('.word').forEach(wordEl => {
+                wordEl.addEventListener('click', (e) => {
+                    const text = wordEl.textContent.trim(); // Obtener el texto de la palabra
+                    if (text && !selectedItems.includes(text)) {
+                        selectedItems.push(text); // Agregar a la lista de seleccionados
+                        updateLocalStorage(); // Actualizar localStorage
+                        wordEl.classList.add('highlighted'); // Resaltar visualmente la palabra
+                        updateSelectedWordsList(); // Actualizar la lista visual
+                    }
+                    e.stopPropagation(); // Evitar que el clic propague al body
+                });
+            });
+
+            // Añadir evento de selección de texto (frase) en la primera línea
+            subtitleDisplay.addEventListener('pointerup', (e) => {
+                const selection = window.getSelection();
+                const selectedText = selection.toString().trim(); // Obtener el texto seleccionado
+
+                if (selectedText && !selectedItems.includes(selectedText)) {
+                    // Verificar si la selección está completamente dentro de la primera línea
+                    if (selection.rangeCount > 0) {
+                        const range = selection.getRangeAt(0);
+                        const startContainer = range.startContainer;
+                        const endContainer = range.endContainer;
+
+                        // Verificar si ambos extremos de la selección están dentro de '.first-line'
+                        const startWithinFirstLine = startContainer.parentElement.closest('.first-line');
+                        const endWithinFirstLine = endContainer.parentElement.closest('.first-line');
+
+                        if (startWithinFirstLine && endWithinFirstLine) {
+                            // Resaltar la selección
+                            const highlightSpan = document.createElement('span');
+                            highlightSpan.classList.add('highlighted');
+
+                            try {
+                                range.surroundContents(highlightSpan); // Envolver la selección en un span
+                            } catch (error) {
+                                // Si la selección es compleja (cruza nodos), simplemente agregar el texto sin resaltar
+                            }
+
+                            selectedItems.push(selectedText); // Agregar a la lista de seleccionados
+                            updateLocalStorage(); // Actualizar localStorage
+                            updateSelectedWordsList(); // Actualizar la lista visual
+                        }
+                    }
+                }
+
+                // Limpiar la selección visual
+                selection.removeAllRanges();
+                e.stopPropagation(); // Evitar que el clic propague al body
+            });
+        }
+
+        // Función para actualizar el localStorage con los elementos seleccionados
+        function updateLocalStorage() {
+            localStorage.setItem('selectedItems', JSON.stringify(selectedItems));
+        }
+
+        // Función para actualizar la lista visual de palabras seleccionadas
+        function updateSelectedWordsList() {
+            selectedWordsList.innerHTML = ''; // Limpiar la lista existente
+            selectedItems.forEach(item => {
+                const li = document.createElement('li');
+                li.textContent = item; // Agregar el texto de la palabra/frase
+
+                // Botón para eliminar la palabra/frase de la lista
+                const removeBtn = document.createElement('button');
+                removeBtn.textContent = '✖️';
+                removeBtn.title = 'Eliminar';
+                removeBtn.addEventListener('click', () => {
+                    removeSelectedItem(item); // Eliminar el elemento al hacer clic
+                });
+
+                li.appendChild(removeBtn); // Añadir el botón al elemento de la lista
+                selectedWordsList.appendChild(li); // Añadir el elemento a la lista
+            });
+        }
+
+        // Función para eliminar una palabra/frase de la lista de seleccionados
+        function removeSelectedItem(item) {
+            selectedItems = selectedItems.filter(i => i !== item); // Filtrar el elemento
+            updateLocalStorage(); // Actualizar localStorage
+            updateSelectedWordsList(); // Actualizar la lista visual
+
+            // Eliminar la clase 'highlighted' de las palabras/frases eliminadas en el subtítulo
+            const highlightedSpans = subtitleDisplay.querySelectorAll('.highlighted');
+            highlightedSpans.forEach(span => {
+                if (span.textContent.trim() === item) {
+                    span.classList.remove('highlighted'); // Remover la clase
+                    // Reemplazar el span por su contenido de texto
+                    const parent = span.parentNode;
+                    parent.replaceChild(document.createTextNode(span.textContent), span);
+                }
+            });
+        }
+
+        // Función para limpiar toda la lista de seleccionados
+        function clearAllSelectedItems() {
+            selectedItems = []; // Reiniciar la lista
+            updateLocalStorage(); // Actualizar localStorage
+            updateSelectedWordsList(); // Actualizar la lista visual
+
+            // Eliminar todas las clases 'highlighted'
+            const highlightedSpans = subtitleDisplay.querySelectorAll('.highlighted');
+            highlightedSpans.forEach(span => {
+                span.classList.remove('highlighted'); // Remover la clase
+                // Reemplazar el span por su contenido de texto
+                const parent = span.parentNode;
+                parent.replaceChild(document.createTextNode(span.textContent), span);
+            });
+        }
+
+        /* ===========================
+           Eventos para Botones de la Lista de Seleccionados
+           =========================== */
+
+        // Evento para el botón de descargar la lista
+        downloadButton.addEventListener('click', () => {
+            const text = selectedItems.join('\n'); // Unir las palabras/frases con saltos de línea
+            const blob = new Blob([text], { type: 'text/plain' }); // Crear un blob de texto
+            const url = URL.createObjectURL(blob); // Crear una URL para el blob
+
+            const a = document.createElement('a'); // Crear un enlace temporal
+            a.href = url;
+            a.download = 'lista_seleccionada.txt'; // Nombre del archivo de descarga
+            a.click(); // Simular un clic para iniciar la descarga
+
+            URL.revokeObjectURL(url); // Revocar la URL creada
+        });
+
+        // Evento para el botón de limpiar toda la lista
+        clearAllButton.addEventListener('click', () => {
+            if (confirm('¿Estás seguro de que deseas limpiar toda la lista?')) {
+                clearAllSelectedItems(); // Limpiar la lista si el usuario confirma
+            }
+        });
+
+        // Evento para mostrar u ocultar el contenedor de palabras seleccionadas
+        listToggle.addEventListener('click', () => {
+            if (selectedWordsContainer.style.display === 'none' || selectedWordsContainer.style.display === '') {
+                selectedWordsContainer.style.display = 'block'; // Mostrar la lista
+                updateSelectedWordsList(); // Actualizar la lista visual
+            } else {
+                selectedWordsContainer.style.display = 'none'; // Ocultar la lista
+            }
+        });
+
+        /* ===========================
+           Funcionalidad del Modal del Manual de Uso
+           =========================== */
+
+        // Abrir el manual al hacer clic en el ícono
+        manualIcon.addEventListener('click', () => {
+            manualModal.classList.add('active'); // Mostrar el modal
+        });
+
+        // Cerrar el manual al hacer clic en el botón de cerrar
+        manualClose.addEventListener('click', () => {
+            manualModal.classList.remove('active'); // Ocultar el modal
+        });
+
+        // Cerrar el manual al hacer clic fuera del contenido del manual
+        manualModal.addEventListener('click', (e) => {
+            if (e.target === manualModal) {
+                manualModal.classList.remove('active'); // Ocultar el modal
+            }
+        });
+
+        /* ===========================
+           Funcionalidad de la Flecha Flotante Mejorada
+           =========================== */
+
+        // Abrir el manual al hacer clic en la flecha
+        floatingArrowContainer.addEventListener('click', () => {
+            manualModal.classList.add('active'); // Mostrar el modal
+            floatingArrowContainer.style.display = 'none'; // Opcional: ocultar la flecha después de interactuar
+        });
+
+        /* ===========================
+           Reanudación del Video al Hacer Clic en el Body
+           =========================== */
+
+        // Evento para reanudar el video al hacer clic en cualquier parte del body, excepto en áreas interactivas
+        document.body.addEventListener('click', (e) => {
+            // Verificar si el clic está dentro de los subtítulos, la lista, los botones, el manual o la flecha
+            const isClickInsideSubtitle = subtitleContainer.contains(e.target);
+            const isClickInsideList = selectedWordsContainer.contains(e.target);
+            const isClickOnButtons = themeToggle.contains(e.target) || listToggle.contains(e.target);
+            const isClickOnManual = manualModal.contains(e.target) || manualIcon.contains(e.target);
+            const isClickOnArrow = floatingArrowContainer.contains(e.target);
+
+            // Si el clic no está en ninguna de las áreas interactivas, reanudar el video si está pausado
+            if (!isClickInsideSubtitle && !isClickInsideList && !isClickOnButtons && !isClickOnManual && !isClickOnArrow) {
+                if (videoElement.paused && videoElement.currentTime > 0 && !videoElement.ended) {
+                    videoElement.play();
+                }
+            } else if (isClickInsideSubtitle) {
+                // Si el clic está dentro de los subtítulos, pero no en la primera línea
+                const isClickOnWord = e.target.classList.contains('word') || e.target.classList.contains('highlighted');
+                const isClickOnFirstLine = e.target.closest('.first-line');
+                if (isClickOnFirstLine && !isClickOnWord) {
+                    // Hacer clic en la primera línea pero no en una palabra permite reanudar
+                    if (videoElement.paused && videoElement.currentTime > 0 && !videoElement.ended) {
+                        videoElement.play();
+                    }
+                } else if (!isClickOnFirstLine) {
+                    // Hacer clic fuera de la primera línea permite reanudar
+                    if (videoElement.paused && videoElement.currentTime > 0 && !videoElement.ended) {
+                        videoElement.play();
+                    }
+                }
+            }
+        });
+
+        /* ===========================
+           Evitar que Clics en Áreas Interactivas Reanuden el Video
+           =========================== */
+
+        // Evitar que los clics dentro de la lista reanuden el video
+        selectedWordsContainer.addEventListener('click', (e) => {
+            e.stopPropagation(); // Evitar la propagación del evento
+        });
+
+        // Evitar que los clics en botones reanuden el video
+        themeToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+        listToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+
+        // Evitar que los clics en el manual y la flecha reanuden el video
+        manualModal.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+        manualIcon.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+        floatingArrowContainer.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+
+        /* ===========================
+           Inicialización al Cargar la Página
+           =========================== */
+
+        // Al cargar la página, actualizar la lista si ya hay elementos guardados
+        updateSelectedWordsList();
+    </script>
+</body>
+</html>
