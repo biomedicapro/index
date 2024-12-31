@@ -247,7 +247,7 @@
     width: 100%;
     height: 40%; /* Ocupa el 40% de la pantalla */
     background: #000; /* Fondo negro */
-    display: flex;
+    display: none;
     justify-content: center;
     align-items: center;
 }
@@ -273,6 +273,8 @@
     color: white; /* Texto blanco */
     text-align: center;
     overflow: hidden;
+display: none;
+
 }
 
 /* Contenedor de subtítulos en modo día */
@@ -336,6 +338,29 @@ body.day-mode #subtitle-es-display {
         #list-toggle {
             right: 20px; /* Más cerca del borde derecho */
         }
+#fullscreen-toggle {
+    position: fixed;
+    bottom: 20px;
+    right: 80px; /* Ajusta la posición para que esté al lado de los otros botones */
+    width: 50px;
+    height: 50px;
+    background: rgba(0, 0, 0, 0.7); /* Fondo semi-transparente */
+    color: white;
+    border: none;
+    border-radius: 50%; /* Botón circular */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Sombra */
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+#fullscreen-toggle:hover {
+    background: rgba(0, 0, 0, 0.9); /* Fondo más oscuro al pasar el cursor */
+    transform: scale(1.1); /* Aumenta ligeramente el tamaño */
+}
 
         /* Estilo para palabras resaltadas */
         .highlighted {
@@ -624,7 +649,7 @@ body.day-mode #subtitle-es-display {
            =========================== -->
     <button id="theme-toggle" onclick="toggleTheme()">🌙</button>
     <button id="list-toggle">📜</button>
-
+<button id="fullscreen-toggle" aria-label="Pantalla completa">⛶</button>
     <!-- ===========================
            Contenedor de Palabras Seleccionadas
            =========================== -->
@@ -1116,6 +1141,18 @@ body.day-mode #subtitle-es-display {
                 parent.replaceChild(document.createTextNode(span.textContent), span);
             });
         }
+const fullscreenToggle = document.getElementById('fullscreen-toggle');
+
+// Alternar pantalla completa
+fullscreenToggle.addEventListener('click', () => {
+    if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen() // Todo el documento en pantalla completa
+            .catch(err => console.error(`Error al entrar en pantalla completa: ${err}`));
+    } else {
+        document.exitFullscreen() // Salir de pantalla completa
+            .catch(err => console.error(`Error al salir de pantalla completa: ${err}`));
+    }
+});
 
         /* ===========================
            Eventos para Botones de la Lista de Seleccionados
