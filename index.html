@@ -241,40 +241,59 @@
                 transform: translateY(0);
             }
         }
-
-/* Contenedor del video */
-#video-container {
-    width: 100%;
-    height: 40%; /* Ocupa el 40% de la pantalla */
-    background: #000; /* Fondo negro */
-    display: none;
-    justify-content: center;
-    align-items: center;
+/* Aseguramos que todos los elementos ocupen el espacio disponible sin desbordarse */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
-/* Video */
-#video-player {
+/* Configuración para que la página ocupe toda la altura de la pantalla */
+html, body {
     width: 100%;
     height: 100%;
-    object-fit: contain; /* Mantiene la relación de aspecto */
-    display: block;
-}
-
-/* Contenedor de subtítulos */
-#subtitle-container {
-    width: 100%;
-    height: 60%; /* Ocupa el 60% de la pantalla */
+    overflow: hidden; /* Evita que la página desplace verticalmente */
     display: flex;
     flex-direction: column;
-    justify-content: flex-start; /* Subtítulos arriba */
-    align-items: center;
-    padding: 15px 25px;
-    background: rgba(0, 0, 0, 0.8); /* Fondo semi-transparente negro */
-    color: white; /* Texto blanco */
-    text-align: center;
-    overflow: hidden;
-display: none;
+}
 
+/* Estilo para el contenedor del video */
+#video-container {
+    width: 100%;
+    position: relative;
+    top: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-shrink: 0; /* Evita que el contenedor se reduzca */
+    background: #000; /* Fondo opcional para destacar el video */
+    height: auto; /* Ajuste predeterminado */
+}
+
+/* Estilo para el video player */
+#video-player {
+    width: 100%;
+    height: auto; /* Ajuste predeterminado para mantener proporción */
+}
+
+/* Contenedor para subtítulos */
+#subtitle-container {
+    width: 100%;
+    flex-grow: 1; /* Puede crecer hacia abajo */
+    overflow-y: auto; /* Habilita desplazamiento vertical si el contenido supera el espacio */
+    background-color: #000; /* Fondo negro para subtítulos */
+    color: #fff; /* Texto blanco */
+    padding: 1rem; /* Espaciado interno */
+    text-align: center;
+    flex-direction: column;
+}
+
+/* Subtítulos individuales */
+#subtitle-display, #subtitle-es-display {
+    width: 100%;
+    margin-bottom: 0.5rem;
+    font-size: 1.2rem; /* Ajusta el tamaño del texto según necesidad */
+    line-height: 1.5; /* Espaciado entre líneas */
 }
 
 /* Contenedor de subtítulos en modo día */
@@ -282,85 +301,66 @@ body.day-mode #subtitle-container {
     background: rgba(255, 255, 255, 0.8); /* Fondo semi-transparente blanco */
     color: #000; /* Texto negro */
 }
-
-/* Estilos para el display de subtítulos */
-#subtitle-display {
-    width: 100%;
-    line-height: 1.5;
-    word-wrap: break-word;
-    max-width: 90%;
-    user-select: text; /* Permitir selección de texto */
-    font-size: 1.2em;
-}
-
-/* Contenedor de subtítulos en español */
-#subtitle-es-display {
-    margin-top: 10px; /* Espacio entre los subtítulos principales y los en español */
-    width: 100%;
-    color: #CCCCCC; /* Color diferente para distinguir los subtítulos en español */
-    word-wrap: break-word;
-    font-size: 1em;
-    text-align: left;
-}
-
 body.day-mode #subtitle-es-display {
     color: #333333; /* Color adaptado para modo día */
 }
+
+/* Estilo específico para pantallas anchas (mayor a 1024px) */
+@media (min-width: 1024px) {
+    #video-container {
+        max-height: 40vh; /* Máximo 40% de la altura de la pantalla */
+        height: 40vh; /* Asegura que no exceda el límite */
+    }
+
+    #video-player {
+        height: 100%; /* Ajusta el video al alto del contenedor */
+        width: auto; /* Mantiene la proporción al ajustarse por altura */
+    }
+}
+
         /* Botones de cambio de tema y lista */
-        #theme-toggle, #list-toggle {
+        #theme-toggle, #list-toggle, #fullscreen-toggle {
             position: fixed;
-            top: 20px;
-            width: 50px;
-            height: 50px;
-            background: rgba(0, 0, 0, 0.7); /* Fondo semi-transparente negro */
+            top: 3px;
+            width: 40px;
+            height: 40px;
+            background: rgba(0, 0, 0, 0); /* Fondo semi-transparente negro */
             color: white;
             border: none;
             border-radius: 50%; /* Botón circular */
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
+            font-size: 12px;
             cursor: pointer;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Sombra */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); /* Sombra */
             transition: background-color 0.5s, color 0.5s;
         }
 
-        /* Botones en modo día */
-        #theme-toggle.day-mode, #list-toggle.day-mode {
-            background: rgba(255, 255, 255, 0.7); /* Fondo semi-transparente blanco */
-            color: #000; /* Texto negro */
-        }
 
         /* Posición específica de los botones */
+        #fullscreen-toggle {
+            right: 140px; /* Más cerca del borde derecho */
+        }
         #theme-toggle {
             right: 80px; /* A la derecha con margen */
         }
         #list-toggle {
             right: 20px; /* Más cerca del borde derecho */
         }
-#fullscreen-toggle {
-    position: fixed;
-    bottom: 20px;
-    right: 80px; /* Ajusta la posición para que esté al lado de los otros botones */
-    width: 50px;
-    height: 50px;
-    background: rgba(0, 0, 0, 0.7); /* Fondo semi-transparente */
-    color: white;
-    border: none;
-    border-radius: 50%; /* Botón circular */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-    cursor: pointer;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Sombra */
-    transition: background-color 0.3s, transform 0.2s;
-}
 
-#fullscreen-toggle:hover {
-    background: rgba(0, 0, 0, 0.9); /* Fondo más oscuro al pasar el cursor */
-    transform: scale(1.1); /* Aumenta ligeramente el tamaño */
-}
+        #fullscreen-toggle:hover {
+            background: rgba(0, 0, 0, 0.9); /* Fondo más oscuro al pasar el cursor */
+            transform: scale(1.5); /* Aumenta ligeramente el tamaño */
+        }
+        #theme-toggle:hover {
+            background: rgba(0, 0, 0, 0.9); /* Fondo más oscuro al pasar el cursor */
+            transform: scale(1.5); /* Aumenta ligeramente el tamaño */
+        }
+        #list-toggle:hover {
+            background: rgba(0, 0, 0, 0.9); /* Fondo más oscuro al pasar el cursor */
+            transform: scale(1.5); /* Aumenta ligeramente el tamaño */
+        }
 
         /* Estilo para palabras resaltadas */
         .highlighted {
@@ -581,6 +581,39 @@ body.day-mode #subtitle-es-display {
 
         /* Clase para ocultar elementos */
         .hidden { display: none; }
+
+        /* Botón de salir de la reproducción */
+        #exit-button {
+            position: absolute;
+            top: 10px;
+            left: 20px;
+            background-color: rgba(231, 76, 60, 0.9); /* Rojo semi-transparente */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 15px;
+            font-size: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            z-index: 12; /* Por encima de otros elementos */
+        }
+
+        /* Estilos del botón de salir en modo día */
+        body.day-mode #exit-button {
+            background-color: rgba(192, 57, 43, 0.9); /* Rojo más oscuro */
+            color: white;
+        }
+
+        /* Efecto al pasar el cursor sobre el botón de salir */
+        #exit-button:hover {
+            background-color: rgba(231, 76, 60, 1); /* Rojo más oscuro */
+            transform: scale(1.05); /* Aumento de tamaño */
+        }
+
+        body.day-mode #exit-button:hover {
+            background-color: rgba(192, 57, 43, 1); /* Rojo más oscuro en modo día */
+        }
+
     </style>
 </head>
 <body>
@@ -633,23 +666,26 @@ body.day-mode #subtitle-es-display {
     <!-- ===========================
            Contenedor del Video
            =========================== -->
-<div id="video-container">
-    <video id="video-player" controls></video>
-</div>
+    <div id="video-container">
+        <video id="video-player" controls></video>
+    </div>
 
-<!-- Caja de subtítulos -->
-<div id="subtitle-container">
-    <div id="subtitle-display"></div>
-    <div id="subtitle-es-display"></div> <!-- Nuevo contenedor para subtítulos en español -->
-</div>
+    <!-- Caja de subtítulos -->
+    <div id="subtitle-container">
+        <div id="subtitle-display"></div>
+        <div id="subtitle-es-display"></div> <!-- Nuevo contenedor para subtítulos en español -->
+    </div>
 
 
     <!-- ===========================
            Botones de Modo y Lista
            =========================== -->
+        <!-- Botón para salir de la reproducción -->
+        <button id="exit-button" onclick="exitPlayback()">Salir</button>
     <button id="theme-toggle" onclick="toggleTheme()">🌙</button>
+    <button id="fullscreen-toggle" aria-label="Pantalla completa">⛶</button>
     <button id="list-toggle">📜</button>
-<button id="fullscreen-toggle" aria-label="Pantalla completa">⛶</button>
+
     <!-- ===========================
            Contenedor de Palabras Seleccionadas
            =========================== -->
@@ -728,20 +764,236 @@ body.day-mode #subtitle-es-display {
         const manualClose = document.getElementById('manual-close');
         const floatingArrowContainer = document.getElementById('floating-arrow-container');
 
+        // Botón de salir de la reproducción
+        const exitButton = document.getElementById('exit-button');
+
         // Variables para controlar el estado
         let lastSubtitle = null; // Último subtítulo mostrado
         let isDayMode = false; // Estado del modo día/noche
         let selectedItems = []; // Lista de palabras/frases seleccionadas
         let videoFile = null; // Archivo de video seleccionado
+        let currentFileName = null; // Nombre del archivo de video actual
+        let isPlaying = false; // Estado de reproducción
+        let vocab = new Set(); // Conjunto de vocabulario seleccionado
 
         /* ===========================
-           Carga de Datos desde localStorage
+           Configuración de IndexedDB
+           =========================== */
+        let db;
+        const dbName = "VideoSubtitlesDB";
+
+        // Abrir o crear la base de datos
+        const request = indexedDB.open(dbName, 2); // Incrementar la versión si se agregan nuevos stores
+
+        request.onerror = function(event) {
+            console.error("Error al abrir IndexedDB:", event.target.errorCode);
+        };
+
+        request.onupgradeneeded = function(event) {
+            db = event.target.result;
+            // Crear un object store para el video
+            if (!db.objectStoreNames.contains('videoStore')) {
+                db.createObjectStore('videoStore', { keyPath: 'id' });
+            }
+            // Crear un object store para los subtítulos originales
+            if (!db.objectStoreNames.contains('subtitlesStore')) {
+                db.createObjectStore('subtitlesStore', { keyPath: 'id' });
+            }
+            // Crear un object store para los subtítulos en español
+            if (!db.objectStoreNames.contains('spanishSubtitlesStore')) {
+                db.createObjectStore('spanishSubtitlesStore', { keyPath: 'id' });
+            }
+            // Crear un object store para la posición del video
+            if (!db.objectStoreNames.contains('videoStateStore')) {
+                db.createObjectStore('videoStateStore', { keyPath: 'id' });
+            }
+            // Crear un object store para las selecciones de palabras/frases
+            if (!db.objectStoreNames.contains('selectedItemsStore')) {
+                db.createObjectStore('selectedItemsStore', { keyPath: 'id' });
+            }
+        };
+
+        request.onsuccess = function(event) {
+            db = event.target.result;
+            // Al cargar la página, intentar cargar datos almacenados
+            loadStoredData();
+        };
+
+        /* ===========================
+           Carga de Datos desde IndexedDB
            =========================== */
 
-        // Recuperar elementos seleccionados previamente almacenados en localStorage
-        const storedItems = localStorage.getItem('selectedItems');
-        if (storedItems) {
-            selectedItems = JSON.parse(storedItems);
+        async function loadStoredData() {
+            const transaction = db.transaction(['videoStore', 'subtitlesStore', 'spanishSubtitlesStore', 'videoStateStore', 'selectedItemsStore'], 'readonly');
+            const videoStore = transaction.objectStore('videoStore');
+            const subtitlesStore = transaction.objectStore('subtitlesStore');
+            const spanishSubtitlesStore = transaction.objectStore('spanishSubtitlesStore');
+            const videoStateStore = transaction.objectStore('videoStateStore');
+            const selectedItemsStore = transaction.objectStore('selectedItemsStore');
+
+            // Obtener el video
+            const videoRequest = videoStore.get('video');
+            videoRequest.onsuccess = function(event) {
+                const videoData = event.target.result;
+                if (videoData) {
+                    currentFileName = videoData.fileName;
+                    videoFile = new Blob([videoData.videoBlob], { type: 'video/mp4' });
+                    // Cargar el video desde Blob
+                    const videoURL = URL.createObjectURL(videoFile);
+                    videoElement.src = videoURL;
+                }
+            };
+
+            // Obtener los subtítulos originales
+            const subtitlesRequest = subtitlesStore.get('subtitles');
+            subtitlesRequest.onsuccess = function(event) {
+                const subtitlesData = event.target.result;
+                if (subtitlesData) {
+                    parseSRT(subtitlesData.content);
+                }
+            };
+
+            // Obtener los subtítulos en español
+            const spanishSubtitlesRequest = spanishSubtitlesStore.get('spanishSubtitles');
+            spanishSubtitlesRequest.onsuccess = function(event) {
+                const spanishSubtitlesData = event.target.result;
+                if (spanishSubtitlesData) {
+                    parseSRTSpanish(spanishSubtitlesData.content);
+                }
+            };
+
+            // Obtener la posición de reproducción
+            const videoStateRequest = videoStateStore.get('videoState');
+            videoStateRequest.onsuccess = function(event) {
+                const videoStateData = event.target.result;
+                if (videoStateData && videoFile) {
+                    const resume = confirm(`Has visto el video "${currentFileName}" hasta ${formatTime(videoStateData.currentTime)}. ¿Deseas reanudar desde allí?`);
+                    if (resume) {
+                        videoElement.currentTime = videoStateData.currentTime;
+                        videoElement.play();
+                        isPlaying = true;
+                        // Mostrar el contenedor de video y subtítulos
+                        uploadContainer.style.display = 'none'; // Ocultar el contenedor de carga
+                        videoContainer.style.display = 'flex'; // Mostrar el contenedor de video
+                        subtitleContainer.style.display = 'flex'; // Mostrar el contenedor de subtítulos
+                        floatingArrowContainer.style.display = 'none'; // Ocultar la flecha una vez iniciado el video
+                        // Solicitar pantalla completa
+                        enterFullScreen(videoContainer);
+                        // Mostrar el botón de salir
+                        exitButton.style.display = 'block';
+                    } else {
+                        // Si el usuario no desea reanudar, eliminar los datos guardados
+                        deleteVideoData(currentFileName);
+                    }
+                }
+            };
+
+            // Cargar selectedItems desde IndexedDB
+            const selectedItemsRequest = selectedItemsStore.get('selectedItems');
+            selectedItemsRequest.onsuccess = function(event) {
+                const data = event.target.result;
+                if (data && Array.isArray(data.items)) {
+                    selectedItems = data.items;
+                    updateSelectedWordsList();
+                }
+            };
+
+            // Agregar listeners después de cargar datos
+            videoElement.addEventListener('timeupdate', updateSubtitles);
+            videoElement.addEventListener('timeupdate', saveProgress);
+            videoElement.addEventListener('ended', videoEnded);
+        }
+
+        /* ===========================
+           Funciones para Guardar Datos en IndexedDB
+           =========================== */
+
+        // Función para guardar archivos Blob en IndexedDB
+        function saveFileToDB(storeName, id, file, fileName) {
+            const transaction = db.transaction([storeName], 'readwrite');
+            const store = transaction.objectStore(storeName);
+            const data = { id: id, fileName: fileName, videoBlob: file };
+            const request = store.put(data);
+            request.onsuccess = function() {
+                console.log(`Archivo guardado en ${storeName}`);
+            };
+            request.onerror = function(event) {
+                console.error(`Error al guardar el archivo en ${storeName}:`, event.target.errorCode);
+            };
+        }
+
+        // Función para guardar texto en IndexedDB
+        function saveTextToDB(storeName, id, content) {
+            const transaction = db.transaction([storeName], 'readwrite');
+            const store = transaction.objectStore(storeName);
+            const data = { id: id, content: content };
+            const request = store.put(data);
+            request.onsuccess = function() {
+                console.log(`Texto guardado en ${storeName}`);
+            };
+            request.onerror = function(event) {
+                console.error(`Error al guardar el texto en ${storeName}:`, event.target.errorCode);
+            };
+        }
+
+        // Función para guardar selectedItems en IndexedDB
+        function saveSelectedItemsToDB() {
+            const transaction = db.transaction(['selectedItemsStore'], 'readwrite');
+            const store = transaction.objectStore('selectedItemsStore');
+            const data = { id: 'selectedItems', items: selectedItems };
+            const request = store.put(data);
+            request.onsuccess = function() {
+                console.log("Seleccionadas guardadas en IndexedDB");
+            };
+            request.onerror = function(event) {
+                console.error("Error al guardar seleccionadas en IndexedDB:", event.target.errorCode);
+            };
+        }
+
+        // Función para guardar la posición actual del video
+        function saveVideoState(currentTime) {
+            const transaction = db.transaction(['videoStateStore'], 'readwrite');
+            const store = transaction.objectStore('videoStateStore');
+            const data = { id: 'videoState', currentTime: currentTime };
+            const request = store.put(data);
+            request.onsuccess = function() {
+                console.log("Estado del video guardado");
+            };
+            request.onerror = function(event) {
+                console.error("Error al guardar el estado del video:", event.target.errorCode);
+            };
+        }
+
+        // Función para eliminar datos del video y subtítulos
+        function deleteVideoData(fileName) {
+            const transaction = db.transaction(['videoStore', 'subtitlesStore', 'spanishSubtitlesStore', 'videoStateStore', 'selectedItemsStore'], 'readwrite');
+            // Eliminar video
+            const videoStore = transaction.objectStore('videoStore');
+            videoStore.delete('video').onsuccess = function() {
+                console.log("Video eliminado de IndexedDB");
+            };
+            // Eliminar subtítulos
+            const subtitlesStore = transaction.objectStore('subtitlesStore');
+            subtitlesStore.delete('subtitles').onsuccess = function() {
+                console.log("Subtítulos eliminados de IndexedDB");
+            };
+            // Eliminar subtítulos en español
+            const spanishSubtitlesStore = transaction.objectStore('spanishSubtitlesStore');
+            spanishSubtitlesStore.delete('spanishSubtitles').onsuccess = function() {
+                console.log("Subtítulos en español eliminados de IndexedDB");
+            };
+            // Eliminar estado del video
+            const videoStateStore = transaction.objectStore('videoStateStore');
+            videoStateStore.delete('videoState').onsuccess = function() {
+                console.log("Estado del video eliminado de IndexedDB");
+            };
+            // Eliminar selectedItems
+            const selectedItemsStore = transaction.objectStore('selectedItemsStore');
+            selectedItemsStore.delete('selectedItems').onsuccess = function() {
+                console.log("Seleccionadas eliminadas de IndexedDB");
+                selectedItems = [];
+                updateSelectedWordsList();
+            };
         }
 
         /* ===========================
@@ -751,6 +1003,9 @@ body.day-mode #subtitle-es-display {
         // Evento para manejar la carga del archivo de video
         document.getElementById('video-upload').addEventListener('change', (event) => {
             videoFile = event.target.files[0]; // Guardar el archivo seleccionado
+            if (videoFile) {
+                saveFileToDB('videoStore', 'video', videoFile, videoFile.name);
+            }
         });
 
         // Evento para manejar la carga del archivo de subtítulos originales
@@ -760,6 +1015,7 @@ body.day-mode #subtitle-es-display {
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     parseSRT(e.target.result); // Parsear el contenido del archivo SRT
+                    saveTextToDB('subtitlesStore', 'subtitles', e.target.result);
                 };
                 reader.readAsText(srtFile); // Leer el archivo como texto
             }
@@ -772,6 +1028,7 @@ body.day-mode #subtitle-es-display {
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     parseSRTSpanish(e.target.result); // Parsear el contenido del archivo SRT en español
+                    saveTextToDB('spanishSubtitlesStore', 'spanishSubtitles', e.target.result);
                 };
                 reader.readAsText(srtEsFile); // Leer el archivo como texto
             }
@@ -851,23 +1108,31 @@ body.day-mode #subtitle-es-display {
         }
 
         /* ===========================
+           Función para Formatear el Tiempo
+           =========================== */
+        function formatTime(seconds) {
+            const hrs = Math.floor(seconds / 3600);
+            const mins = Math.floor((seconds % 3600) / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${hrs}:${mins < 10 ? '0' : ''}${mins}:${secs < 10 ? '0' : ''}${secs}`;
+        }
+
+        /* ===========================
            Función para Iniciar la Reproducción
            =========================== */
 
         function startPlayback() {
-            // Verificar si se ha cargado un video
+            // Verificar si se han cargado los archivos necesarios
             if (!videoFile) {
                 alert('Por favor, sube un video primero.');
                 return;
             }
 
-            // Verificar si se han cargado subtítulos originales
             if (subtitles.length === 0) {
                 alert('Por favor, sube un archivo de subtítulos original (.srt).');
                 return;
             }
 
-            // Verificar si se han cargado subtítulos en español
             if (spanishSubtitles.length === 0) {
                 alert('Por favor, sube un archivo de subtítulos en español (.srt).');
                 return;
@@ -879,53 +1144,103 @@ body.day-mode #subtitle-es-display {
             videoContainer.style.display = 'flex'; // Mostrar el contenedor de video
             subtitleContainer.style.display = 'flex'; // Mostrar el contenedor de subtítulos
             floatingArrowContainer.style.display = 'none'; // Ocultar la flecha una vez iniciado el video
+            exitButton.style.display = 'block'; // Mostrar el botón de salir
 
-            // Entrar en modo pantalla completa
+            // Solicitar pantalla completa
             enterFullScreen(document.documentElement);
+
             videoElement.play(); // Iniciar reproducción del video
+            isPlaying = true;
 
-            // Evento para actualizar los subtítulos en función del tiempo de reproducción
-            videoElement.ontimeupdate = () => {
-                const currentTime = videoElement.currentTime;
-                const subtitle = subtitles.find(
-                    (sub) => currentTime >= sub.start && currentTime <= sub.end
-                );
-                const spanishSubtitle = spanishSubtitles.find(
-                    (sub) => currentTime >= sub.start && currentTime <= sub.end
-                );
-
-                if (subtitle && subtitle !== lastSubtitle) {
-                    lastSubtitle = subtitle; // Actualizar el último subtítulo mostrado
-                    videoElement.pause(); // Pausar el video para mostrar el subtítulo
-
-                    const lines = calculateEffectiveLines(subtitle.text); // Calcular líneas efectivas
-                    adjustSubtitleSize(lines); // Ajustar el tamaño de la fuente según las líneas
-                    const formattedSubtitle = formatSubtitle(subtitle.text); // Formatear el subtítulo
-                    subtitleDisplay.innerHTML = formattedSubtitle; // Mostrar el subtítulo
-
-                    addSelectionEvents(); // Añadir eventos de selección a las palabras
-
-                    subtitleDisplay.style.opacity = '1'; // Hacer visible el subtítulo
-                } else if (!subtitle) {
-                    subtitleDisplay.style.opacity = '0'; // Ocultar el subtítulo si no hay ninguno
-                }
-
-                // Manejar los subtítulos en español
-                if (spanishSubtitle) {
-                    const formattedSpanishSubtitle = formatSpanishSubtitle(spanishSubtitle.text);
-                    spanishSubtitleDisplay.innerHTML = formattedSpanishSubtitle; // Aplicar formateo
-                    spanishSubtitleDisplay.style.opacity = '1'; // Hacer visible el subtítulo en español
-                } else {
-                    spanishSubtitleDisplay.style.opacity = '0'; // Ocultar el subtítulo en español si no hay ninguno
-                }
-            };
+            // Mostrar el botón de salir
+            exitButton.style.display = 'block';
         }
 
         /* ===========================
-           Funciones para Manejar Subtítulos
+           Función para Salir de la Reproducción
            =========================== */
 
-        // Calcular el número efectivo de líneas para ajustar el tamaño de la fuente
+        function exitPlayback() {
+            // Pausar el video
+            videoElement.pause();
+
+            // Guardar la posición actual antes de salir
+            saveVideoState(videoElement.currentTime);
+
+            // Mostrar el contenedor de carga
+            uploadContainer.style.display = 'flex';
+
+            // Ocultar el contenedor de video y subtítulos
+            videoContainer.style.display = 'none';
+            subtitleContainer.style.display = 'none';
+
+            // Resetear los subtítulos mostrados
+            subtitleDisplay.innerHTML = '';
+            spanishSubtitleDisplay.innerHTML = '';
+            lastSubtitle = null;
+
+            // Salir de pantalla completa
+            if (document.fullscreenElement) {
+                document.exitFullscreen()
+                    .catch(err => console.error(`Error al salir de pantalla completa: ${err}`));
+            }
+
+            // Ocultar el botón de salir
+            exitButton.style.display = 'none';
+
+            // Mostrar la flecha flotante nuevamente
+            floatingArrowContainer.style.display = 'flex';
+        }
+
+        /* ===========================
+           Función para Actualizar Subtítulos
+           =========================== */
+
+        function updateSubtitles() {
+            const currentTime = videoElement.currentTime;
+            const subtitle = subtitles.find(
+                (sub) => currentTime >= sub.start && currentTime <= sub.end
+            );
+            const spanishSubtitle = spanishSubtitles.find(
+                (sub) => currentTime >= sub.start && currentTime <= sub.end
+            );
+
+            if (subtitle && subtitle !== lastSubtitle) {
+                lastSubtitle = subtitle; // Actualizar el último subtítulo mostrado
+                videoElement.pause(); // Pausar el video para mostrar el subtítulo
+
+                const lines = calculateEffectiveLines(subtitle.text); // Calcular líneas efectivas
+                adjustSubtitleSize(lines); // Ajustar el tamaño de la fuente según las líneas
+                const formattedSubtitle = formatSubtitle(subtitle.text); // Formatear el subtítulo
+                subtitleDisplay.innerHTML = formattedSubtitle; // Mostrar el subtítulo
+
+                addSelectionEvents(); // Añadir eventos de selección a las palabras
+
+                subtitleDisplay.style.opacity = '1'; // Hacer visible el subtítulo
+
+                // Guardar la posición actual del video
+                saveVideoState(currentTime);
+            } else if (!subtitle) {
+                subtitleDisplay.style.opacity = '0'; // Ocultar el subtítulo si no hay ninguno
+            }
+
+            // Manejar los subtítulos en español
+            if (spanishSubtitle) {
+                const formattedSpanishSubtitle = formatSpanishSubtitle(spanishSubtitle.text);
+                spanishSubtitleDisplay.innerHTML = formattedSpanishSubtitle; // Aplicar formateo
+                spanishSubtitleDisplay.style.opacity = '1'; // Hacer visible el subtítulo en español
+
+                // Guardar la posición actual del video
+                saveVideoState(currentTime);
+            } else {
+                spanishSubtitleDisplay.style.opacity = '0'; // Ocultar el subtítulo en español si no hay ninguno
+            }
+        }
+
+        /* ===========================
+           Función para Calcular Líneas Efectivas
+           =========================== */
+
         function calculateEffectiveLines(text) {
             const words = text.split(' ');
             let effectiveLines = 0;
@@ -937,7 +1252,10 @@ body.day-mode #subtitle-es-display {
             return effectiveLines;
         }
 
-        // Ajustar el tamaño de la fuente según el número de líneas
+        /* ===========================
+           Función para Ajustar el Tamaño de la Fuente
+           =========================== */
+
         function adjustSubtitleSize(lineCount) {
             if (lineCount <= 2) {
                 spanishSubtitleDisplay.style.fontSize = '38px';
@@ -952,7 +1270,10 @@ body.day-mode #subtitle-es-display {
             }
         }
 
-        // Formatear los subtítulos originales, envolviendo cada palabra en un <span> para permitir la selección
+        /* ===========================
+           Función para Formatear los Subtítulos Originales
+           =========================== */
+
         function formatSubtitle(text) {
             const lines = text.split('\n');
             if (lines.length === 0) return '';
@@ -968,7 +1289,10 @@ body.day-mode #subtitle-es-display {
             return `<div class="first-line">${formattedFirstLine}</div><br>${otherLines}`;
         }
 
-        // Nueva función para formatear los subtítulos en español (sin envoltura en spans)
+        /* ===========================
+           Función para Formatear los Subtítulos en Español
+           =========================== */
+
         function formatSpanishSubtitle(text) {
             // Puedes aplicar cualquier formateo adicional aquí si es necesario
             // Por ejemplo, puedes agregar cursivas, negritas, etc.
@@ -1008,7 +1332,7 @@ body.day-mode #subtitle-es-display {
             manualContentStyle(); // Ajustar estilos del contenido del manual
 
             // Cambiar el ícono del botón según el modo
-            themeToggle.innerHTML = isDayMode ? '🌙' : '☀️';
+            themeToggle.innerHTML = isDayMode ? '☀️' : '🌙';
         }
 
         // Ajustar estilos del contenido del manual según el modo
@@ -1035,9 +1359,9 @@ body.day-mode #subtitle-es-display {
                     const text = wordEl.textContent.trim(); // Obtener el texto de la palabra
                     if (text && !selectedItems.includes(text)) {
                         selectedItems.push(text); // Agregar a la lista de seleccionados
-                        updateLocalStorage(); // Actualizar localStorage
-                        wordEl.classList.add('highlighted'); // Resaltar visualmente la palabra
                         updateSelectedWordsList(); // Actualizar la lista visual
+                        saveSelectedItemsToDB(); // Guardar en IndexedDB
+                        wordEl.classList.add('highlighted'); // Resaltar visualmente la palabra
                     }
                     e.stopPropagation(); // Evitar que el clic propague al body
                 });
@@ -1071,8 +1395,8 @@ body.day-mode #subtitle-es-display {
                             }
 
                             selectedItems.push(selectedText); // Agregar a la lista de seleccionados
-                            updateLocalStorage(); // Actualizar localStorage
                             updateSelectedWordsList(); // Actualizar la lista visual
+                            saveSelectedItemsToDB(); // Guardar en IndexedDB
                         }
                     }
                 }
@@ -1081,11 +1405,6 @@ body.day-mode #subtitle-es-display {
                 selection.removeAllRanges();
                 e.stopPropagation(); // Evitar que el clic propague al body
             });
-        }
-
-        // Función para actualizar el localStorage con los elementos seleccionados
-        function updateLocalStorage() {
-            localStorage.setItem('selectedItems', JSON.stringify(selectedItems));
         }
 
         // Función para actualizar la lista visual de palabras seleccionadas
@@ -1111,8 +1430,8 @@ body.day-mode #subtitle-es-display {
         // Función para eliminar una palabra/frase de la lista de seleccionados
         function removeSelectedItem(item) {
             selectedItems = selectedItems.filter(i => i !== item); // Filtrar el elemento
-            updateLocalStorage(); // Actualizar localStorage
             updateSelectedWordsList(); // Actualizar la lista visual
+            saveSelectedItemsToDB(); // Guardar en IndexedDB
 
             // Eliminar la clase 'highlighted' de las palabras/frases eliminadas en el subtítulo
             const highlightedSpans = subtitleDisplay.querySelectorAll('.highlighted');
@@ -1129,8 +1448,8 @@ body.day-mode #subtitle-es-display {
         // Función para limpiar toda la lista de seleccionados
         function clearAllSelectedItems() {
             selectedItems = []; // Reiniciar la lista
-            updateLocalStorage(); // Actualizar localStorage
             updateSelectedWordsList(); // Actualizar la lista visual
+            saveSelectedItemsToDB(); // Guardar en IndexedDB
 
             // Eliminar todas las clases 'highlighted'
             const highlightedSpans = subtitleDisplay.querySelectorAll('.highlighted');
@@ -1141,18 +1460,23 @@ body.day-mode #subtitle-es-display {
                 parent.replaceChild(document.createTextNode(span.textContent), span);
             });
         }
-const fullscreenToggle = document.getElementById('fullscreen-toggle');
 
-// Alternar pantalla completa
-fullscreenToggle.addEventListener('click', () => {
-    if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen() // Todo el documento en pantalla completa
-            .catch(err => console.error(`Error al entrar en pantalla completa: ${err}`));
-    } else {
-        document.exitFullscreen() // Salir de pantalla completa
-            .catch(err => console.error(`Error al salir de pantalla completa: ${err}`));
-    }
-});
+        /* ===========================
+           Funcionalidad de Pantalla Completa
+           =========================== */
+
+        const fullscreenToggle = document.getElementById('fullscreen-toggle');
+
+        // Alternar pantalla completa
+        fullscreenToggle.addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                enterFullScreen(document.documentElement) // Todo el documento en pantalla completa
+                    .catch(err => console.error(`Error al entrar en pantalla completa: ${err}`));
+            } else {
+                document.exitFullscreen() // Salir de pantalla completa
+                    .catch(err => console.error(`Error al salir de pantalla completa: ${err}`));
+            }
+        });
 
         /* ===========================
            Eventos para Botones de la Lista de Seleccionados
@@ -1229,7 +1553,7 @@ fullscreenToggle.addEventListener('click', () => {
             // Verificar si el clic está dentro de los subtítulos, la lista, los botones, el manual o la flecha
             const isClickInsideSubtitle = subtitleContainer.contains(e.target);
             const isClickInsideList = selectedWordsContainer.contains(e.target);
-            const isClickOnButtons = themeToggle.contains(e.target) || listToggle.contains(e.target);
+            const isClickOnButtons = themeToggle.contains(e.target) || listToggle.contains(e.target) || fullscreenToggle.contains(e.target);
             const isClickOnManual = manualModal.contains(e.target) || manualIcon.contains(e.target);
             const isClickOnArrow = floatingArrowContainer.contains(e.target);
 
@@ -1237,6 +1561,7 @@ fullscreenToggle.addEventListener('click', () => {
             if (!isClickInsideSubtitle && !isClickInsideList && !isClickOnButtons && !isClickOnManual && !isClickOnArrow) {
                 if (videoElement.paused && videoElement.currentTime > 0 && !videoElement.ended) {
                     videoElement.play();
+                    isPlaying = true;
                 }
             } else if (isClickInsideSubtitle) {
                 // Si el clic está dentro de los subtítulos, pero no en la primera línea
@@ -1246,11 +1571,13 @@ fullscreenToggle.addEventListener('click', () => {
                     // Hacer clic en la primera línea pero no en una palabra permite reanudar
                     if (videoElement.paused && videoElement.currentTime > 0 && !videoElement.ended) {
                         videoElement.play();
+                        isPlaying = true;
                     }
                 } else if (!isClickOnFirstLine) {
                     // Hacer clic fuera de la primera línea permite reanudar
                     if (videoElement.paused && videoElement.currentTime > 0 && !videoElement.ended) {
                         videoElement.play();
+                        isPlaying = true;
                     }
                 }
             }
@@ -1272,6 +1599,9 @@ fullscreenToggle.addEventListener('click', () => {
         listToggle.addEventListener('click', (e) => {
             e.stopPropagation();
         });
+        fullscreenToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
 
         // Evitar que los clics en el manual y la flecha reanuden el video
         manualModal.addEventListener('click', (e) => {
@@ -1285,11 +1615,85 @@ fullscreenToggle.addEventListener('click', () => {
         });
 
         /* ===========================
+           Funcionalidad del Botón de Salir
+           =========================== */
+
+        function exitPlayback() {
+            // Pausar el video
+            videoElement.pause();
+
+            // Guardar la posición actual antes de salir
+            saveVideoState(videoElement.currentTime);
+
+            // Mostrar el contenedor de carga
+            uploadContainer.style.display = 'flex';
+
+            // Ocultar el contenedor de video y subtítulos
+            videoContainer.style.display = 'none';
+            subtitleContainer.style.display = 'none';
+
+            // Resetear los subtítulos mostrados
+            subtitleDisplay.innerHTML = '';
+            spanishSubtitleDisplay.innerHTML = '';
+            lastSubtitle = null;
+
+            // Salir de pantalla completa
+            if (document.fullscreenElement) {
+                document.exitFullscreen()
+                    .catch(err => console.error(`Error al salir de pantalla completa: ${err}`));
+            }
+
+            // Ocultar el botón de salir
+            exitButton.style.display = 'none';
+
+            // Mostrar la flecha flotante nuevamente
+            floatingArrowContainer.style.display = 'flex';
+        }
+
+        /* ===========================
+           Función para Manejar el Fin del Video
+           =========================== */
+
+        function videoEnded() {
+            if (!currentFileName) return;
+            deleteVideoData(currentFileName);
+            // Ocultar el botón de volver al menú
+            exitButton.style.display = 'none';
+        }
+
+        /* ===========================
+           Función para Guardar el Progreso Antes de Cerrar la Página
+           =========================== */
+
+        window.addEventListener('beforeunload', () => {
+            if (!currentFileName) return;
+            saveProgress();
+        });
+
+        function saveProgress() {
+            if (videoElement && videoElement.currentTime) {
+                saveVideoState(videoElement.currentTime);
+            }
+        }
+
+        /* ===========================
+           Función para Formatear el Tiempo
+           =========================== */
+        function formatTime(seconds) {
+            const hrs = Math.floor(seconds / 3600);
+            const mins = Math.floor((seconds % 3600) / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${hrs}:${mins < 10 ? '0' : ''}${mins}:${secs < 10 ? '0' : ''}${secs}`;
+        }
+
+        /* ===========================
            Inicialización al Cargar la Página
            =========================== */
 
         // Al cargar la página, actualizar la lista si ya hay elementos guardados
-        updateSelectedWordsList();
+        window.addEventListener('load', () => {
+            updateSelectedWordsList();
+        });
     </script>
 </body>
 </html>
