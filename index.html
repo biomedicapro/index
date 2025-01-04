@@ -306,10 +306,10 @@ body.day-mode #subtitle-es-display {
 }
 
 /* Estilo específico para pantallas anchas (mayor a 1024px) */
-@media (min-width: 1024px) {
+@media (min-width: 1024px), (max-height: 450px) {
     #video-container {
-        max-height: 40vh; /* Máximo 40% de la altura de la pantalla */
-        height: 40vh; /* Asegura que no exceda el límite */
+        max-height: 42vh; /* Máximo 40% de la altura de la pantalla */
+        height: 42vh; /* Asegura que no exceda el límite */
     }
 
     #video-player {
